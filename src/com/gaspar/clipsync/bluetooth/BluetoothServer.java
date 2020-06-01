@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import javax.bluetooth.BluetoothStateException;
@@ -48,6 +51,9 @@ public class BluetoothServer implements Runnable {
 					String input = new BufferedReader(new InputStreamReader(inputStream))
 							  .lines().collect(Collectors.joining("\n"));
 					Utils.setclipboard(input); //set clipboard
+				}
+				try(OutputStream outputStream = connection.openOutputStream()) { //send confirmation back
+					outputStream.write("received".getBytes(StandardCharsets.UTF_8));
 				}
 				connection.close();
 			}

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.text.Text?>
@@ -12,7 +13,14 @@
 	fx:controller="com.gaspar.clipsync.bluetooth.BluetoothPaneController"
 	alignment="CENTER">
 	
-	<Text text="test..."/>
+	<Text
+		text="Bluetooth mode"
+		style="-fx-font-size: 20px"/>
+	
+	<HBox 
+		fx:id="resultHolder"
+		alignment="CENTER"
+		spacing="10"/>
 	
 	<BorderPane>
 		<left>

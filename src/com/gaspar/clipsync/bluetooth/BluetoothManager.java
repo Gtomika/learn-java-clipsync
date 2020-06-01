@@ -5,9 +5,6 @@ import java.util.concurrent.Executors;
 
 import javax.bluetooth.BluetoothStateException;
 
-import com.intel.bluetooth.BlueCoveImpl;
-import com.intel.bluetooth.BluetoothStack;
-
 public class BluetoothManager {
 
 	private static BluetoothManager instance;

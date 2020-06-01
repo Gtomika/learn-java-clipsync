@@ -3,6 +3,8 @@ package com.gaspar.clipsync.bluetooth;
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.bluetooth.BluetoothStateException;
+
 import com.gaspar.clipsync.ClipSyncMain;
 import com.gaspar.clipsync.Mode;
 import com.gaspar.clipsync.SelectorPaneController;
@@ -18,7 +20,9 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -29,11 +33,24 @@ import javafx.stage.Stage;
  */
 public class BluetoothPaneController {
 
+	/**
+	 * This button allows the user to go back to mode selection.
+	 * A confirmation prompt is shown before.
+	 */
 	@FXML
 	private Button backButton;
 	
+	/**
+	 * Displays bluetooth API implementor BlueCove.
+	 */
 	@FXML
 	private Text backendInfoText;
+	
+	/**
+	 * Displays the result of the bluetooth initialization.
+	 */
+	@FXML
+	private HBox resultHolder;
 	
 	/**
 	 * Sets the central pane to the bluetooth pane.
@@ -49,6 +66,13 @@ public class BluetoothPaneController {
 		BorderPane.setMargin(controller.backButton, new Insets(10,10,10,10));
 		BorderPane.setAlignment(controller.backButton, Pos.CENTER);
 		ClipSyncMain.getRoot().setCenter(bluetoothPane);
+		
+		try { //attempt to start bluetooth server
+			BluetoothManager.instance().createServer();
+			controller.buildResultPane(true);
+		} catch (BluetoothStateException e) {
+			controller.buildResultPane(false);
+		}
 	}
 	
 	/**
@@ -73,4 +97,23 @@ public class BluetoothPaneController {
 		}
 	}
 	
+	/**
+	 * Creates a text view and an icon to show the result of the bluetooth initialization.
+	 * @param success If the initialization succeeded.
+	 */
+	private void buildResultPane(boolean success) {
+		Text text = new Text();
+		ImageView icon = new ImageView();
+		if(success) {
+			text.setText("Ready for ClipSync!");
+			icon.setImage(new Image("/resources/success.png"));
+		} else { //fail
+			text.setText("Initialization failed!\nMake sure your computer has bluetooth!");
+			icon.setImage(new Image("/resources/fail.png"));
+		}
+		text.setStyle("-fx-font-size: 20px");
+		icon.fitWidthProperty().set(50);
+		icon.fitHeightProperty().set(50);
+		resultHolder.getChildren().addAll(text, icon);
+	}
 }
