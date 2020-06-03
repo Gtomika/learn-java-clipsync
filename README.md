@@ -1,6 +1,6 @@
 # Learn Java ClipSync
 
-The clipsync server is in development, currently not working...
+The clipsync server is in development, currently only the bluetooth syncing is working...
 
 This is the application for synchronizing the clipboard of your android phone, and your computer.
 It's meant to use with my [Learn Java app](https://play.google.com/store/apps/details?id=com.gaspar.learnjava).

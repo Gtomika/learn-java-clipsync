@@ -1,15 +1,11 @@
 package com.gaspar.clipsync.bluetooth;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
+import java.util.Scanner;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
@@ -28,37 +24,61 @@ public class BluetoothServer implements Runnable {
 	 * The unique identifier for the bluetooth service.
 	 */
 	private static final UUID serverUUID = new UUID("2e33e9bcc2834347b642bfa1f48cdf72", false);
-	
+	/**
+	 * URL on which the server is found.
+	 */
 	private static final String serverURL = "btspp://localhost:" + serverUUID.toString() + ";name=LearnJavaServer";
+	/**
+	 * A message that is just for initiating connection, and pairing. Is not copied to clipboard.
+	 */
+	private static final String HANDSHAKE_MESSAGE = "handshake";
+	/**
+	 * This marks the end of the input from the client. Should not be used in code samples.
+	 */
+	private static final String DATA_DELIMITER = "DATA_DELIMITER";
 	
 	/**
 	 * This represents the local bluetooth device.
 	 */
-	@SuppressWarnings("unused") //unused for now
 	private LocalDevice localDevice;
 	
 	public BluetoothServer() throws BluetoothStateException {
 		this.localDevice = LocalDevice.getLocalDevice();
+		boolean isDiscoverable = localDevice.setDiscoverable(DiscoveryAgent.GIAC);
+		if(!isDiscoverable) {
+			throw new BluetoothStateException("Could not be made discoverable!");
+		}
 	}
 	
+	@SuppressWarnings("resource")
 	@Override
 	public void run() {
+		StreamConnection connection = null;
 		try {
+			System.out.println("Starting server...");
 			StreamConnectionNotifier service = (StreamConnectionNotifier) Connector.open(serverURL);
 			while(true) { //go as long as not terminated
-				StreamConnection connection = service.acceptAndOpen(); //blocks until client connects
-				try(InputStream inputStream = connection.openInputStream()) {
-					String input = new BufferedReader(new InputStreamReader(inputStream))
-							  .lines().collect(Collectors.joining("\n"));
-					Utils.setclipboard(input); //set clipboard
+				System.out.println("Accepting connection from the app...");
+				connection = service.acceptAndOpen(); //blocks until client connects
+				System.out.println("Accepted client connection from the app!");
+				InputStream inputStream = connection.openInputStream();
+				Scanner scanner = new Scanner(inputStream, "UTF-8");
+				scanner.useDelimiter(DATA_DELIMITER);
+				String input = scanner.next();
+				System.out.println("Received data from the app!");
+				if(!input.equals(HANDSHAKE_MESSAGE)) { //normal data, clear and set to clipboard
+					Utils.setclipboard(input); 
+					System.out.println("Copied data to clipboard!");
 				}
-				try(OutputStream outputStream = connection.openOutputStream()) { //send confirmation back
-					outputStream.write("received".getBytes(StandardCharsets.UTF_8));
-				}
-				connection.close();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+				try {
+					if(connection!=null) connection.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 	}
 }
