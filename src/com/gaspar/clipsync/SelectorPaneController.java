@@ -3,6 +3,7 @@ package com.gaspar.clipsync;
 import java.io.IOException;
 
 import com.gaspar.clipsync.bluetooth.BluetoothPaneController;
+import com.gaspar.clipsync.network.NetworkPaneController;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -59,7 +60,7 @@ public class SelectorPaneController {
 			BluetoothPaneController.showBluetoothPane();
 		} else { //network
 			mode = Mode.NETWORK;
-			//TODO
+			NetworkPaneController.showNetworkPane();
 		}
 		if(rememberCheckBox.selectedProperty().get()) { //save
 			Utils.writePreferredMode(mode);

@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
-import javax.bluetooth.BluetoothStateException;
-import javax.bluetooth.DiscoveryAgent;
-import javax.bluetooth.LocalDevice;
 import javax.bluetooth.UUID;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
@@ -18,7 +15,7 @@ import com.gaspar.clipsync.Utils;
  * A background thread that accepts incoming bluetooth connections.
  * @author Gáspár Tamás
  */
-public class BluetoothServer implements Runnable {
+public class BluetoothServer extends Thread {
 	
 	/**
 	 * The unique identifier for the bluetooth service.
@@ -31,54 +28,63 @@ public class BluetoothServer implements Runnable {
 	/**
 	 * A message that is just for initiating connection, and pairing. Is not copied to clipboard.
 	 */
-	private static final String HANDSHAKE_MESSAGE = "handshake";
+	public static final String HANDSHAKE_MESSAGE = "handshake";
 	/**
 	 * This marks the end of the input from the client. Should not be used in code samples.
 	 */
-	private static final String DATA_DELIMITER = "DATA_DELIMITER";
-	
+	public static final String DATA_DELIMITER = "DATA_DELIMITER";
 	/**
-	 * This represents the local bluetooth device.
+	 * The serivce broadcasted by this device.
 	 */
-	private LocalDevice localDevice;
-	
-	public BluetoothServer() throws BluetoothStateException {
-		this.localDevice = LocalDevice.getLocalDevice();
-		boolean isDiscoverable = localDevice.setDiscoverable(DiscoveryAgent.GIAC);
-		if(!isDiscoverable) {
-			throw new BluetoothStateException("Could not be made discoverable!");
-		}
-	}
-	
-	@SuppressWarnings("resource")
+	private StreamConnectionNotifier service;
+	/**
+	 * The server loop. Use the kill method to stop the server.
+	 */
 	@Override
 	public void run() {
 		StreamConnection connection = null;
 		try {
-			System.out.println("Starting server...");
-			StreamConnectionNotifier service = (StreamConnectionNotifier) Connector.open(serverURL);
-			while(true) { //go as long as not terminated
-				System.out.println("Accepting connection from the app...");
+			service = (StreamConnectionNotifier) Connector.open(serverURL);
+			while(!isInterrupted()) { //go as long as not terminated
+				System.out.println("Accepting bluetooth connection from the app...");
 				connection = service.acceptAndOpen(); //blocks until client connects
-				System.out.println("Accepted client connection from the app!");
-				InputStream inputStream = connection.openInputStream();
-				Scanner scanner = new Scanner(inputStream, "UTF-8");
-				scanner.useDelimiter(DATA_DELIMITER);
-				String input = scanner.next();
-				System.out.println("Received data from the app!");
-				if(!input.equals(HANDSHAKE_MESSAGE)) { //normal data, clear and set to clipboard
-					Utils.setclipboard(input); 
-					System.out.println("Copied data to clipboard!");
+				System.out.println("Accepted bluetooth connection from the app!");
+				try(InputStream inputStream = connection.openInputStream()) { //open input stream
+					try(Scanner scanner = new Scanner(inputStream, "UTF-8")) { //open scanner
+						scanner.useDelimiter(DATA_DELIMITER);
+						String input = scanner.next();
+						System.out.println("Received data from the app!");
+						if(!input.equals(HANDSHAKE_MESSAGE)) { //normal data, clear and set to clipboard
+							Utils.setclipboard(input); 
+							System.out.println("Copied data to clipboard!");
+						}
+					}
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			return; //this means that the thread was stopped using the kill method
 		} finally {
 				try {
-					if(connection!=null) connection.close();
+					if(connection!=null) {
+						connection.close();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+		}
+	}
+	
+	/**
+	 * Stops the server from accepting requests.
+	 */
+	public void kill() {
+		interrupt(); 
+		try {
+			if(service != null) { //this will cause the acceptAndOpen method to stop waiting with IOException
+				service.close();
+			}
+		} catch(Exception e) {
+			e.printStackTrace(); //some kind of closing exception
 		}
 	}
 }

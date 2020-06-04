@@ -4,7 +4,10 @@ import java.io.IOException;
 
 import javax.bluetooth.BluetoothStateException;
 
+import com.gaspar.clipsync.bluetooth.BluetoothManager;
 import com.gaspar.clipsync.bluetooth.BluetoothPaneController;
+import com.gaspar.clipsync.network.NetworkManager;
+import com.gaspar.clipsync.network.NetworkPaneController;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -46,6 +49,15 @@ public class ClipSyncMain extends Application {
 	}
 	
 	/**
+	 * Called on application stop, kills the server processes if they are active.
+	 */
+	@Override
+	public void stop() throws Exception {
+		BluetoothManager.instance().stopServer(); //stop bluetooth server, if running
+		NetworkManager.instance().stopServer(); //stop network server, if running
+	}
+
+	/**
 	 * Makes the mode (bluetooth/network) pane visible, if there is a preferred mode. 
 	 * If there isn't, shows a selector screen.
 	 */
@@ -56,7 +68,7 @@ public class ClipSyncMain extends Application {
 			BluetoothPaneController.showBluetoothPane();
 			break;
 		case NETWORK:
-			
+			NetworkPaneController.showNetworkPane();
 			break;
 		default: //not set
 			SelectorPaneController.showSelectorPane();

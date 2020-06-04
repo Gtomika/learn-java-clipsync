@@ -61,14 +61,4 @@ public abstract class Utils {
 			return Mode.NOT_SET;
 		}
 	}
-	
-	/**
-	 * Some characters are malformed when receiving the data (encoding issues?). This manually replaces them.
-	 * @param data The data.
-	 * @return The cleared data.
-	 */
-	public static String replaceMalformedCharacters(String data) {
-		data = data.replace("Â", "\t");
-		return data;
-	}
 }
