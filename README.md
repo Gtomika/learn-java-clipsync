@@ -19,7 +19,7 @@ It should work for Windows, Mac and Linux.
 To use this mode, both your phone and our computer must be on the same local network, for example 
 on the same *WiFi*.
 
-#Download
+## Download
 
 **Windows**: [download link](https://github.com/Gtomika/learn-java-clipsync/releases/download/1.0/ClipSync_Windows.zip)
 
