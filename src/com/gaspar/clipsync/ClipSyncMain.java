@@ -42,8 +42,10 @@ public class ClipSyncMain extends Application {
 			
 			setPreferredModePane(); //initialize the screen
 		} catch(BluetoothStateException e) { //errors related to bluetooth
-			//TODO
-		} catch(IOException e) {
+			Utils.logException(e);
+			e.printStackTrace();
+		} catch(Exception e) {
+			Utils.logException(e);
 			e.printStackTrace();
 		}
 	}

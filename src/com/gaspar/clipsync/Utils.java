@@ -3,7 +3,10 @@ package com.gaspar.clipsync;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,6 +62,18 @@ public abstract class Utils {
 			return Mode.valueOf(lines.get(0)); 
 		} catch(Exception e) {
 			return Mode.NOT_SET;
+		}
+	}
+	
+	/**
+	 * Writes an exception stack trace to a file.
+	 */
+	public static void logException(Exception e) {
+		File logFile = new File(System.getProperty("user.dir") + "/.log");
+		try(PrintWriter writer = new PrintWriter(new FileOutputStream(logFile, true))) {
+			e.printStackTrace(writer);
+		} catch(Exception exc) {
+			e.printStackTrace();
 		}
 	}
 }
