@@ -17,17 +17,12 @@ It should work for Windows, Mac and Linux.
 ## Local network syncing
 
 To use this mode, both your phone and our computer must be on the same local network, for example 
-on the same *WiFi*.
+on the same *WiFi*. You phone cannot be the mobile hotspot.
 
 ## Download
 
-**Windows**: [download link](https://github.com/Gtomika/learn-java-clipsync/releases/download/1.0/ClipSync_Windows.zip)
+[Download link](https://github.com/Gtomika/learn-java-clipsync/releases/download/2.0/LearnJavaClipSync.zip)
 
-To use it, extract the archive, and double click in the **start.bat** file!
-
-**Other OS**: [download link](https://github.com/Gtomika/learn-java-clipsync/releases/download/0.9/LearnJavaClipSync.jar)
-
-Use the command line to start it, like any jar file:
-*java -jar path/to/jar/file/LearnJavaClipSync.jar* (replace with your actual path)
+To start the server, extract the archive, and simply double click in the *jar* file.
 
 

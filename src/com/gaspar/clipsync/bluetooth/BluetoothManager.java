@@ -4,6 +4,8 @@ import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 
+import com.gaspar.clipsync.ClipSyncMain;
+
 /**
  * The class responsible for managing the bluetooth server.
  * @author Gáspár Tamás
@@ -47,7 +49,8 @@ public class BluetoothManager {
 			}
 		}
 		if(server != null && server.isAlive()) throw new RuntimeException("Server already running");
-		System.out.println("Starting bluetooth server...");
+		ClipSyncMain.logMessage("Starting bluetooth server...");
+		
 		server = new BluetoothServer();
 		server.start();
 	}
@@ -56,7 +59,7 @@ public class BluetoothManager {
 	 * Stops the background server process.
 	 */
 	public void stopServer() {
-		System.out.println("Stopping bluetooth server...");
+		ClipSyncMain.logMessage("Stopping bluetooth server...");
 		if(server != null) {
 			server.kill();
 		}

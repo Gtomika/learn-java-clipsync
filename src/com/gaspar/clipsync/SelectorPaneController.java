@@ -1,94 +1,120 @@
 package com.gaspar.clipsync;
 
-import java.io.IOException;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.util.Enumeration;
+
+import javax.swing.AbstractButton;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.border.EmptyBorder;
 
 import com.gaspar.clipsync.bluetooth.BluetoothPaneController;
 import com.gaspar.clipsync.network.NetworkPaneController;
 
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-
 /**
- * Acts as the controller for the mode selector pane.
+ * Acts as the controller for the mode selector panel.
  * @author Gáspár Tamás
  */
 public class SelectorPaneController {
 	
-	/**
-	 * This layout holds the radio buttons used for mode selection.
-	 */
-	@FXML
-	private VBox buttonHolder;
+	public static final String SELECTOR_PANEL_ID = "selector_panel";
+	
+	private static final String BLUETOOTH_TEXT = "Bluetooth mode";
+	
+	private static final String NETWORK_TEXT = "Local network mode";
 	
 	/**
-	 * Grouping of the radio buttons.
+	 * Contains the radio buttons which allow for the selection of a clip sync mode.
 	 */
-	private ToggleGroup toggleGroup;
-
-	/**
-	 * Checkbox that the user can tick if they want the selected mode to be remembered.
-	 */
-	@FXML
-	private CheckBox rememberCheckBox;
+	private static ButtonGroup group;
 	
 	/**
-	 * Button that selects a mode.
+	 * @return A panel that contains tools for the user to select a clip sync mode. This is 
+	 * added to the global card layout.
 	 */
-	@FXML
-	private Button nextButton;
+	public static JPanel buildSelectorPanel() {
+		JPanel selectorPanel = new JPanel();
+		selectorPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		selectorPanel.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		selectorPanel.setLayout(new BoxLayout(selectorPanel, BoxLayout.Y_AXIS));
+		
+		//add title
+		JLabel title = new JLabel();
+		title.setBorder(new EmptyBorder(new Insets(20, 20, 20, 20)));
+		title.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		title.setText("Select a ClipSync mode!");
+		title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
+		selectorPanel.add(title);
+		
+		//add radio buttons
+		group = new ButtonGroup();
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		buttonPanel.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		buttonPanel.setBorder(new EmptyBorder(new Insets(20, 20, 20, 20)));
+		BoxLayout buttonLayout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
+		buttonPanel.setLayout(buttonLayout);
+		
+		JRadioButton bluetoothButton = new JRadioButton();
+		bluetoothButton.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		bluetoothButton.setText(BLUETOOTH_TEXT);
+		bluetoothButton.setSelected(true); //selected by default
+		buttonPanel.add(bluetoothButton);
+		group.add(bluetoothButton);
+		
+		JRadioButton networkButton = new JRadioButton();
+		networkButton.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		networkButton.setText(NETWORK_TEXT);
+		buttonPanel.add(networkButton);
+		group.add(networkButton);
+		selectorPanel.add(buttonPanel);
+		
+		//add ok button
+		JButton button = new JButton();
+		button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		button.setMargin(new Insets(20, 20, 20, 20));
+		button.setMaximumSize(new Dimension(100,30));
+		button.setText("SELECT");
+		button.addActionListener(SelectorPaneController::selectButtonPressed);
+		selectorPanel.add(button);
+		
+		return selectorPanel;
+	}
 	
 	/**
 	 * This method is called when the user selects a preferred mode.
 	 * @param event
 	 */
-	@FXML
-	private void nextButtonPressed(ActionEvent event) throws IOException {
-		RadioButton selected = (RadioButton)toggleGroup.getSelectedToggle();
-		String selectedText = selected.getText();
-		Mode mode = null;
-		if(selectedText.equals("Bluetooth")) {
-			mode = Mode.BLUETOOTH;
-			BluetoothPaneController.showBluetoothPane();
-		} else { //network
-			mode = Mode.NETWORK;
-			NetworkPaneController.showNetworkPane();
-		}
-		if(rememberCheckBox.selectedProperty().get()) { //save
-			Utils.writePreferredMode(mode);
+	private static void selectButtonPressed(ActionEvent event)  {
+		Enumeration<AbstractButton> buttons = group.getElements();
+		AbstractButton button = null;
+		while(buttons.hasMoreElements()) {
+			button = buttons.nextElement();
+			if(button.isSelected()) {
+				//this is selected
+				if(button.getText().equals(BLUETOOTH_TEXT)) {
+					BluetoothPaneController.showBluetoothPane();
+				} else if(button.getText().equals(NETWORK_TEXT)) {
+					NetworkPaneController.showNetworkPane();
+				}
+				return;
+			}
 		}
 	}
 	
 	/**
-	 * Shows the selector pane where the user can select from bluetooth and network mode.
+	 * Shows the selector panel where the user can select from bluetooth and network mode.
 	 */
-	public static void showSelectorPane() throws IOException {
-		final FXMLLoader loader = new FXMLLoader(ClipSyncMain.class.getResource("/resources/ModeSelector.fxml"));
-		VBox selectorPane = loader.load();
-		final SelectorPaneController controller = loader.getController();
-		controller.toggleGroup = new ToggleGroup();
-		//load radio buttons
-		RadioButton bluetoothButton = new RadioButton("Bluetooth");
-		bluetoothButton.setStyle("-fx-font-size:20px");
-		RadioButton networkButton = new RadioButton("Local network");
-		networkButton.setStyle("-fx-font-size:20px");
-		controller.toggleGroup.getToggles().addAll(bluetoothButton, networkButton);
-		controller.toggleGroup.selectToggle(bluetoothButton);
-		controller.buttonHolder.getChildren().addAll(bluetoothButton, networkButton);
-		
-		//add properties programmatically
-		BorderPane.setMargin(controller.rememberCheckBox, new Insets(10,10,10,10));
-		BorderPane.setAlignment(controller.rememberCheckBox, Pos.CENTER);
-		BorderPane.setMargin(controller.nextButton, new Insets(10,10,10,10));
-		BorderPane.setAlignment(controller.nextButton, Pos.CENTER);
-		ClipSyncMain.getRoot().setCenter(selectorPane);
+	public static void showSelectorPanel() {
+		ClipSyncMain.getCardLayout().show(ClipSyncMain.getCardPanel(), SELECTOR_PANEL_ID);
+		ClipSyncMain.logMessage("Showing selector screen...");
+		ClipSyncMain.getFrame().pack();
 	}
 }

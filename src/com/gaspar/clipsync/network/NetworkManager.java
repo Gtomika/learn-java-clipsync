@@ -2,6 +2,7 @@ package com.gaspar.clipsync.network;
 
 import java.io.IOException;
 
+import com.gaspar.clipsync.ClipSyncMain;
 import com.gaspar.clipsync.bluetooth.BluetoothManager;
 
 /**
@@ -36,7 +37,7 @@ public class NetworkManager {
 	 */
 	public void startServer() throws IOException {
 		if(server != null && server.isAlive()) throw new RuntimeException("Server already running");
-		System.out.println("Starting network server...");
+		ClipSyncMain.logMessage("Starting local network server...");
 		server = new NetworkServer();
 		server.start();
 	}
@@ -45,7 +46,7 @@ public class NetworkManager {
 	 * Terminates the server thread.
 	 */
 	public void stopServer() {
-		System.out.println("Stopping network server...");
+		ClipSyncMain.logMessage("Stopping local network server...");
 		if(server != null) server.kill();
 	}
 }

@@ -1,78 +1,83 @@
 package com.gaspar.clipsync.bluetooth;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.bluetooth.BluetoothStateException;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import com.gaspar.clipsync.ClipSyncMain;
 import com.gaspar.clipsync.Mode;
 import com.gaspar.clipsync.SelectorPaneController;
 import com.gaspar.clipsync.Utils;
 
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
+
 
 /**
  * The controller for the pane that displays when the user selected bluetooth mode.
  * @author Gáspár Tamás
  */
 public class BluetoothPaneController {
-
-	/**
-	 * This button allows the user to go back to mode selection.
-	 * A confirmation prompt is shown before.
-	 */
-	@FXML
-	private Button backButton;
 	
-	/**
-	 * Displays bluetooth API implementor BlueCove.
-	 */
-	@FXML
-	private Text backendInfoText;
+	public static final String BLUEOTOOTH_PANEL_ID = "bluetooth_panel";
 	
-	/**
-	 * Displays the result of the bluetooth initialization.
-	 */
-	@FXML
-	private HBox resultHolder;
+	public static JPanel buildBluetoothPanel() {
+		JPanel bluetoothPanel = new JPanel();
+		bluetoothPanel.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		bluetoothPanel.setAlignmentY(JPanel.TOP_ALIGNMENT);
+		bluetoothPanel.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		bluetoothPanel.setLayout(new BoxLayout(bluetoothPanel, BoxLayout.Y_AXIS));
+		
+		JPanel bluetoothBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+		bluetoothBar.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		
+		JLabel label = new JLabel("Bluetooth ClipSync active");
+		label.setBorder(new EmptyBorder(new Insets(20, 20, 20, 20)));
+		bluetoothBar.add(label);
+		
+		JLabel icon = new JLabel();
+		icon.setIcon(new ImageIcon(ClipSyncMain.class.getResource("/resources/success.png")));
+		bluetoothBar.add(icon);
+		
+		bluetoothPanel.add(bluetoothBar);
+		
+		JButton backButton = new JButton();
+		backButton.setAlignmentX(JPanel.CENTER_ALIGNMENT);
+		backButton.setMargin(new Insets(20, 20, 20, 20));
+		backButton.setMaximumSize(new Dimension(100,30));
+		backButton.setText("BACK");
+		backButton.addActionListener(BluetoothPaneController::backButtonPressed);
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
+		buttonPanel.add(backButton);
+		bluetoothPanel.add(buttonPanel);
+		//bluetoothPanel.add(backButton);
+		
+		return bluetoothPanel;
+	}
 	
 	/**
 	 * Sets the central pane to the bluetooth pane. Attempts to start the bluetooth server.
 	 * @throws IOException On FXML load error.
 	 */
-	public static void showBluetoothPane() throws IOException {
-		final FXMLLoader loader = new FXMLLoader(ClipSyncMain.class.getResource("/resources/BluetoothPane.fxml"));
-		VBox bluetoothPane = loader.load();
-		final BluetoothPaneController controller = loader.getController();
-		//add properties programmatically
-		BorderPane.setMargin(controller.backendInfoText, new Insets(10,10,10,10));
-		BorderPane.setAlignment(controller.backendInfoText, Pos.CENTER);
-		BorderPane.setMargin(controller.backButton, new Insets(10,10,10,10));
-		BorderPane.setAlignment(controller.backButton, Pos.CENTER);
-		ClipSyncMain.getRoot().setCenter(bluetoothPane);
-		
-		try { //attempt to start bluetooth server
+	public static void showBluetoothPane() {
+		try {
 			BluetoothManager.instance().startServer();
-			controller.buildResultPane(true);
-		} catch (BluetoothStateException e) {
-			e.printStackTrace();
-			controller.buildResultPane(false);
+			//bluetooth started
+			ClipSyncMain.getCardLayout().show(ClipSyncMain.getCardPanel(), BLUEOTOOTH_PANEL_ID);
+			ClipSyncMain.getFrame().pack();
+		} catch(BluetoothStateException e) {
+			ClipSyncMain.showError("Failed to activate bluetooth on your computer! Make sure you have bluetooth. If not, you can try network mode.");
+			ClipSyncMain.logMessage("Bluetooth error: " + e.getMessage());
 		}
 	}
 	
@@ -81,41 +86,13 @@ public class BluetoothPaneController {
 	 * It will make the app "forget" the preferred mode and show the selection screen.
 	 * @param event
 	 */
-	@FXML
-	public void backButtonPressed(ActionEvent event) throws IOException {
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Select mode");
-		alert.setHeaderText("Are you sure you want to go back to mode selection?");
-		alert.setContentText("This will stop any ClipSync until you select a mode again!");
-		
-		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-		stage.getIcons().add(new Image(this.getClass().getResource("/resources/icon.png").toString()));
-		
-		Optional<ButtonType> result = alert.showAndWait();
-		if (result.get() == ButtonType.OK){ //got confrimation
+	private static void backButtonPressed(ActionEvent event) {
+		int res = JOptionPane.showConfirmDialog(ClipSyncMain.getFrame(), "Are you sure you want to go back to mode selection?");
+		if(res == JOptionPane.YES_OPTION) {
 			BluetoothManager.instance().stopServer(); //stop server
 			Utils.writePreferredMode(Mode.NOT_SET); //forget preference
-			SelectorPaneController.showSelectorPane(); //show main menu
+			SelectorPaneController.showSelectorPanel(); //show main menu
 		}
 	}
 	
-	/**
-	 * Creates a text view and an icon to show the result of the bluetooth initialization.
-	 * @param success If the initialization succeeded.
-	 */
-	private void buildResultPane(boolean success) {
-		Text text = new Text();
-		ImageView icon = new ImageView();
-		if(success) {
-			text.setText("Ready for ClipSync!");
-			icon.setImage(new Image("/resources/success.png"));
-		} else { //fail
-			text.setText("Initialization failed!\nMake sure your computer has bluetooth!");
-			icon.setImage(new Image("/resources/fail.png"));
-		}
-		text.setStyle("-fx-font-size: 20px");
-		icon.fitWidthProperty().set(50);
-		icon.fitHeightProperty().set(50);
-		resultHolder.getChildren().addAll(text, icon);
-	}
 }
