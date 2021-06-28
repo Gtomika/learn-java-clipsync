@@ -103,7 +103,7 @@ public class ClipSyncMain {
 		});
 		
 		//make visible
-		logMessage("Learn java ClipSync server ready!");
+		logMessage(Lang.getTranslation("learn_java_ready"));
 		frame.setVisible(true);
 	}
 	

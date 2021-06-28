@@ -10,6 +10,7 @@ import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
 
 import com.gaspar.clipsync.ClipSyncMain;
+import com.gaspar.clipsync.Lang;
 import com.gaspar.clipsync.Utils;
 
 /**
@@ -47,17 +48,17 @@ public class BluetoothServer extends Thread {
 		try {
 			service = (StreamConnectionNotifier) Connector.open(serverURL);
 			while(!isInterrupted()) { //go as long as not terminated
-				ClipSyncMain.logMessage("Accepting bluetooth connection from the app...");
+				ClipSyncMain.logMessage(Lang.getTranslation("bluetooth_accepting"));
 				connection = service.acceptAndOpen(); //blocks until client connects
-				ClipSyncMain.logMessage("Accepted bluetooth connection from the app!");
+				ClipSyncMain.logMessage(Lang.getTranslation("bluetooth_accepted"));
 				try(InputStream inputStream = connection.openInputStream()) { //open input stream
 					try(Scanner scanner = new Scanner(inputStream, "UTF-8")) { //open scanner
 						scanner.useDelimiter(DATA_DELIMITER);
 						String input = scanner.next();
-						ClipSyncMain.logMessage("Received data from the app!");
+						ClipSyncMain.logMessage(Lang.getTranslation("data_received"));
 						if(!input.equals(HANDSHAKE_MESSAGE)) { //normal data, clear and set to clipboard
 							Utils.setclipboard(input); 
-							ClipSyncMain.logMessage("Copied data to clipboard!");
+							ClipSyncMain.logMessage(Lang.getTranslation("data_copied"));
 						}
 					}
 				}

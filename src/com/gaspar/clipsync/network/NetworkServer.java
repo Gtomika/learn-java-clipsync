@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 
 import com.gaspar.clipsync.ClipSyncMain;
+import com.gaspar.clipsync.Lang;
 import com.gaspar.clipsync.Utils;
 import com.gaspar.clipsync.bluetooth.BluetoothServer;
 
@@ -50,27 +51,27 @@ public class NetworkServer extends Thread {
 	public void run() {
 		while(!isInterrupted()) { //go as long as not stopped
 			try {
-				ClipSyncMain.logMessage("Accepting broadcasts over local network...");
+				ClipSyncMain.logMessage(Lang.getTranslation("network_accepting"));
 				byte[] buffer = new byte[2048];
 				DatagramPacket datagram = new DatagramPacket(buffer, buffer.length);
 				serverSocket.receive(datagram); //blocks until data received
-				ClipSyncMain.logMessage("Received something from " + datagram.getAddress().getHostAddress());
+				ClipSyncMain.logMessage(Lang.getTranslation("network_accepted") + datagram.getAddress().getHostAddress());
 				
 				String input = new String(datagram.getData(), 0, datagram.getLength(), StandardCharsets.UTF_8);
 				if(datagram.getPort() == APP_PORT_NUMBER && input.endsWith(BluetoothServer.DATA_DELIMITER) ) {
 					//this means that it's from the app
-					ClipSyncMain.logMessage("Received data from the app!");
+					ClipSyncMain.logMessage(Lang.getTranslation("data_received"));
 					int endIndex = input.length() - BluetoothServer.DATA_DELIMITER.length();
 					Utils.setclipboard(input.substring(0, endIndex)); //cut off delimiter 
-					ClipSyncMain.logMessage("Copied data to clipboard!");
+					ClipSyncMain.logMessage(Lang.getTranslation("data_copied"));
 					//send back a confirmation message
 					InetAddress appAddress = datagram.getAddress();
 					byte[] responseBuffer = CONFIRMATION_MESSAGE.getBytes(StandardCharsets.UTF_8);
 					DatagramPacket response = new DatagramPacket(responseBuffer, responseBuffer.length, appAddress, APP_PORT_NUMBER);
 					serverSocket.send(response);
-					ClipSyncMain.logMessage("Sent response message to the app!");
+					ClipSyncMain.logMessage(Lang.getTranslation("network_response"));
 				} else {
-					ClipSyncMain.logMessage("This message is not from the app.");
+					ClipSyncMain.logMessage(Lang.getTranslation("network_unknown"));
 				}
 			} catch( IOException e) {} //if the socket was closed by thread kill
 		}

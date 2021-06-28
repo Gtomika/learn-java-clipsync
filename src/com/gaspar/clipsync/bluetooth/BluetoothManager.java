@@ -5,6 +5,7 @@ import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 
 import com.gaspar.clipsync.ClipSyncMain;
+import com.gaspar.clipsync.Lang;
 
 /**
  * The class responsible for managing the bluetooth server.
@@ -45,11 +46,11 @@ public class BluetoothManager {
 			this.localDevice = LocalDevice.getLocalDevice(); //checks bluetooth
 			boolean isDiscoverable = localDevice.setDiscoverable(DiscoveryAgent.GIAC);
 			if(!isDiscoverable) {
-				throw new BluetoothStateException("Could not be made discoverable!");
+				throw new BluetoothStateException(Lang.getTranslation("bluetooth_fail_disc"));
 			}
 		}
-		if(server != null && server.isAlive()) throw new RuntimeException("Server already running");
-		ClipSyncMain.logMessage("Starting bluetooth server...");
+		if(server != null && server.isAlive()) throw new RuntimeException(Lang.getTranslation("server_running"));
+		ClipSyncMain.logMessage(Lang.getTranslation("bluetooth_starting"));
 		
 		server = new BluetoothServer();
 		server.start();
@@ -59,7 +60,7 @@ public class BluetoothManager {
 	 * Stops the background server process.
 	 */
 	public void stopServer() {
-		ClipSyncMain.logMessage("Stopping bluetooth server...");
+		ClipSyncMain.logMessage(Lang.getTranslation("bluetooth_stopping"));
 		if(server != null) {
 			server.kill();
 		}

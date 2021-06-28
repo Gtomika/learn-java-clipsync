@@ -26,9 +26,9 @@ public class SelectorPaneController {
 	
 	public static final String SELECTOR_PANEL_ID = "selector_panel";
 	
-	private static final String BLUETOOTH_TEXT = "Bluetooth mode";
+	private static final String BLUETOOTH_TEXT = Lang.getTranslation("mode_bluetooth");
 	
-	private static final String NETWORK_TEXT = "Local network mode";
+	private static final String NETWORK_TEXT = Lang.getTranslation("mode_network");
 	
 	/**
 	 * Contains the radio buttons which allow for the selection of a clip sync mode.
@@ -49,7 +49,7 @@ public class SelectorPaneController {
 		JLabel title = new JLabel();
 		title.setBorder(new EmptyBorder(new Insets(20, 20, 20, 20)));
 		title.setAlignmentX(JPanel.CENTER_ALIGNMENT);
-		title.setText("Select a ClipSync mode!");
+		title.setText(Lang.getTranslation("mode_select"));
 		title.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
 		selectorPanel.add(title);
 		
@@ -81,7 +81,7 @@ public class SelectorPaneController {
 		button.setAlignmentX(JPanel.CENTER_ALIGNMENT);
 		button.setMargin(new Insets(20, 20, 20, 20));
 		button.setMaximumSize(new Dimension(100,30));
-		button.setText("SELECT");
+		button.setText("OK");
 		button.addActionListener(SelectorPaneController::selectButtonPressed);
 		selectorPanel.add(button);
 		
@@ -114,7 +114,7 @@ public class SelectorPaneController {
 	 */
 	public static void showSelectorPanel() {
 		ClipSyncMain.getCardLayout().show(ClipSyncMain.getCardPanel(), SELECTOR_PANEL_ID);
-		ClipSyncMain.logMessage("Showing selector screen...");
+		ClipSyncMain.logMessage(Lang.getTranslation("log_show_selector"));
 		ClipSyncMain.getFrame().pack();
 	}
 }

@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.gaspar.clipsync.ClipSyncMain;
+import com.gaspar.clipsync.Lang;
 import com.gaspar.clipsync.Mode;
 import com.gaspar.clipsync.SelectorPaneController;
 import com.gaspar.clipsync.Utils;
@@ -34,7 +35,7 @@ public class NetworkPaneController {
 		JPanel networkBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
 		networkBar.setBackground(ClipSyncMain.LEARN_JAVA_COLOR);
 		
-		JLabel label = new JLabel("Network ClipSync active");
+		JLabel label = new JLabel(Lang.getTranslation("network_active"));
 		label.setBorder(new EmptyBorder(new Insets(20, 20, 20, 20)));
 		networkBar.add(label);
 		
@@ -48,7 +49,7 @@ public class NetworkPaneController {
 		backButton.setAlignmentX(JPanel.CENTER_ALIGNMENT);
 		backButton.setMargin(new Insets(20, 20, 20, 20));
 		backButton.setMaximumSize(new Dimension(100,30));
-		backButton.setText("BACK");
+		backButton.setText(Lang.getTranslation("back"));
 		backButton.addActionListener(NetworkPaneController::backButtonPressed);
 		
 		JPanel buttonPanel = new JPanel();
@@ -70,7 +71,7 @@ public class NetworkPaneController {
 			ClipSyncMain.getCardLayout().show(ClipSyncMain.getCardPanel(), NETWORK_PANEL_ID);
 			ClipSyncMain.getFrame().pack();
 		} catch (Exception e) {
-			ClipSyncMain.showError("Failed to start server! Make sure you have connection.\n You can try Bluetooth mode as an alternative.");
+			ClipSyncMain.showError(Lang.getTranslation("network_fail"));
 			ClipSyncMain.logMessage("Network error: " + e.getMessage());
 		}
 	}
@@ -80,7 +81,7 @@ public class NetworkPaneController {
 	 * @param event
 	 */
 	private static void backButtonPressed(ActionEvent event) {
-		int res = JOptionPane.showConfirmDialog(ClipSyncMain.getFrame(), "Are you sure you want to go back to mode selection?");
+		int res = JOptionPane.showConfirmDialog(ClipSyncMain.getFrame(), Lang.getTranslation("back_confirm"));
 		if(res == JOptionPane.YES_OPTION) {
 			NetworkManager.instance().stopServer(); //stop server
 			Utils.writePreferredMode(Mode.NOT_SET); //forget preference
